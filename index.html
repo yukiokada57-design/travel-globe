@@ -175,8 +175,8 @@ let countries = [];
 const COLORS = {
   visited: '#ff7a5c',
   wish:    '#4fd1c5',
-  base:    'rgba(255,255,255,0.04)',
-  hover:   'rgba(255,255,255,0.35)',
+  base:    'rgba(120,145,210,0.28)',
+  hover:   'rgba(160,180,245,0.55)',
 };
 
 // ISO_A3 is "-99" for several countries in this dataset (Norway, France,
@@ -210,11 +210,11 @@ const world = Globe({ rendererConfig: { preserveDrawingBuffer: true, antialias: 
   .showAtmosphere(true)
   .atmosphereColor('#5b8cff')
   .atmosphereAltitude(0.18)
-  .globeImageUrl('assets/earth-day.jpg')
+  .globeImageUrl('assets/earth-dark.jpg')
   .polygonAltitude(0.01)                       // flat — no pop-out
   .polygonCapColor(f => capColor(f, null))
   .polygonSideColor(() => 'rgba(0,0,0,0)')
-  .polygonStrokeColor(() => 'rgba(255,255,255,0.35)')
+  .polygonStrokeColor(() => 'rgba(255,255,255,0.55)')
   .polygonLabel(f => {
     const s = state[idOf(f)];
     const tag = s === 'visited' ? ' ✓ Visited' : s === 'wish' ? ' ★ Want to visit' : '';
@@ -244,10 +244,10 @@ function haptic() {
 // Brighten the globe so land/borders read well on phone screens.
 function brightenLighting() {
   const scene = world.scene();
-  // strong ambient so the whole globe shows its texture evenly (no dark night side),
+  // strong ambient so the whole globe is evenly lit (no dark night side),
   // plus a soft directional light for a gentle sense of depth.
-  scene.add(new THREE.AmbientLight(0xffffff, 2.2));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.5);
+  scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.6);
   dir.position.set(1, 0.6, 1);
   scene.add(dir);
 }

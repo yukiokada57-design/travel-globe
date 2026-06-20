@@ -1,6 +1,6 @@
 // Service Worker — caches everything so the app works fully offline,
 // including in airplane mode after the first visit.
-const CACHE = 'travel-globe-v3';
+const CACHE = 'travel-globe-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,7 @@ const ASSETS = [
   './assets/three.min.js',
   './assets/globe.gl.min.js',
   './assets/countries.geojson',
-  './assets/earth-day.jpg',
+  './assets/earth-dark.jpg',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
