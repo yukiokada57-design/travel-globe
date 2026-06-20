@@ -78,7 +78,14 @@
     font-size: 12px; display: flex; align-items: center; gap: 8px;
     transition: all .18s;
   }
-  .mode-btn .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .mode-btn .swatch {
+    width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
+    padding: 0; border: 1px solid rgba(255,255,255,0.25); cursor: pointer;
+    background: none; -webkit-appearance: none; appearance: none;
+  }
+  .mode-btn .swatch::-webkit-color-swatch-wrapper { padding: 0; }
+  .mode-btn .swatch::-webkit-color-swatch { border: none; border-radius: 3px; }
+  .mode-btn .swatch::-moz-color-swatch { border: none; border-radius: 3px; }
 
   /* Show/hide toggle */
   #togglePanel {
@@ -88,8 +95,6 @@
   }
   #togglePanel:hover { background: rgba(255,255,255,0.12); }
   #togglePanel .dot { color: var(--accent); }
-  .mode-btn.v .swatch { background: var(--visited); }
-  .mode-btn.w .swatch { background: var(--wish); }
   .mode-btn.active { border-color: currentColor; background: rgba(255,255,255,0.12); font-weight: 700; }
   .mode-btn.v.active { box-shadow: inset 0 0 0 1px var(--visited); }
   .mode-btn.w.active { box-shadow: inset 0 0 0 1px var(--wish); }
@@ -149,10 +154,10 @@
     <div class="modes">
       <div class="ml">Click mode</div>
       <button class="mode-btn v active" data-mode="visited">
-        <span class="swatch"></span> Visited
+        <input type="color" class="swatch" data-color="visited" title="Tap to change color" /> Visited
       </button>
       <button class="mode-btn w" data-mode="wish">
-        <span class="swatch"></span> Want to visit
+        <input type="color" class="swatch" data-color="wish" title="Tap to change color" /> Want to visit
       </button>
     </div>
 
@@ -172,12 +177,27 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
 let mode = 'visited';
 let countries = [];
 
+const COLOR_KEY = 'travelGlobe.colors';
+const DEFAULT_COLORS = { visited: '#ff7a5c', wish: '#4fd1c5' };
+// user-chosen fill colors (persisted)
+const userColors = Object.assign({}, DEFAULT_COLORS, JSON.parse(localStorage.getItem(COLOR_KEY) || '{}'));
+
 const COLORS = {
-  visited: '#ff7a5c',
-  wish:    '#4fd1c5',
+  visited: userColors.visited,
+  wish:    userColors.wish,
   base:    'rgba(120,145,210,0.28)',
   hover:   'rgba(160,180,245,0.55)',
 };
+
+// Apply current colors to globe + CSS variables (swatches, stat numbers, share image).
+function applyColors() {
+  COLORS.visited = userColors.visited;
+  COLORS.wish    = userColors.wish;
+  document.documentElement.style.setProperty('--visited', userColors.visited);
+  document.documentElement.style.setProperty('--wish', userColors.wish);
+  document.querySelectorAll('.swatch').forEach(inp => { inp.value = userColors[inp.dataset.color]; });
+  if (typeof world !== 'undefined') refreshColors();
+}
 
 // ISO_A3 is "-99" for several countries in this dataset (Norway, France,
 // Kosovo, etc.), which would make them collide. Fall back to the unique
@@ -296,6 +316,21 @@ document.querySelectorAll('.mode-btn').forEach(b => {
   });
 });
 
+// color pickers — choose your own Visited / Want-to-visit colors
+document.querySelectorAll('.swatch').forEach(inp => {
+  // stop the picker click from also toggling the click-mode underneath
+  inp.addEventListener('click', e => e.stopPropagation());
+  inp.addEventListener('input', () => {
+    userColors[inp.dataset.color] = inp.value;
+    localStorage.setItem(COLOR_KEY, JSON.stringify(userColors));
+    applyColors();
+    updateStats();
+  });
+});
+
+// initialize swatches + CSS variables from saved colors
+applyColors();
+
 // ===== Share / save the current map as an image =====
 // Web build: composes the globe canvas + a caption, then uses the Web Share
 // API (with a download fallback). Capacitor build: swap the share/download
@@ -328,9 +363,9 @@ function buildMapImage() {
   ctx.font = `600 ${20 * s}px "Segoe UI", system-ui, sans-serif`;
   const txt = `${v} visited`, txt2 = `${wsh} want to go`;
   ctx.textAlign = 'right';
-  ctx.fillStyle = '#ff7a5c';
+  ctx.fillStyle = COLORS.visited;
   ctx.fillText(txt, w - 28 * s, h - barH / 2 - 13 * s);
-  ctx.fillStyle = '#4fd1c5';
+  ctx.fillStyle = COLORS.wish;
   ctx.fillText(txt2, w - 28 * s, h - barH / 2 + 13 * s);
   ctx.textAlign = 'left';
 

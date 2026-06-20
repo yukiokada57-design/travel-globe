@@ -1,6 +1,6 @@
 // Service Worker — caches everything so the app works fully offline,
 // including in airplane mode after the first visit.
-const CACHE = 'travel-globe-v4';
+const CACHE = 'travel-globe-v5';
 const ASSETS = [
   './',
   './index.html',
