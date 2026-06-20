@@ -100,6 +100,18 @@
   .mode-btn.w.active { box-shadow: inset 0 0 0 1px var(--wish); }
   .mode-btn .hintkey { margin-left: auto; font-size: 10px; color: var(--muted); }
 
+  /* Color presets */
+  .presets { margin-top: 13px; }
+  .preset-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .preset {
+    width: 34px; height: 22px; border-radius: 7px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.18); overflow: hidden; display: flex;
+    transition: transform .12s, box-shadow .12s;
+  }
+  .preset span { flex: 1; height: 100%; }
+  .preset:hover { transform: scale(1.1); }
+  .preset.active { box-shadow: 0 0 0 2px var(--accent); border-color: var(--accent); }
+
   .row { display: flex; gap: 8px; margin-top: 14px; }
   .btn {
     flex: 1; padding: 9px; font-size: 12px; cursor: pointer;
@@ -159,6 +171,11 @@
       <button class="mode-btn w" data-mode="wish">
         <input type="color" class="swatch" data-color="wish" title="Tap to change color" /> Want to visit
       </button>
+    </div>
+
+    <div class="presets">
+      <div class="ml">Color presets</div>
+      <div class="preset-row" id="presetRow"></div>
     </div>
 
     <button class="btn" id="shareBtn" style="width:100%;margin-top:13px;">⤴ Share my map</button>
@@ -325,11 +342,50 @@ document.querySelectorAll('.swatch').forEach(inp => {
     localStorage.setItem(COLOR_KEY, JSON.stringify(userColors));
     applyColors();
     updateStats();
+    markActivePreset();
   });
+});
+
+// ===== Color presets (Visited / Want-to-visit pairs) =====
+const PRESETS = [
+  { name: 'Classic', visited: '#ff7a5c', wish: '#4fd1c5' },
+  { name: 'Sunset',  visited: '#ff6b6b', wish: '#ffd166' },
+  { name: 'Ocean',   visited: '#4dabf7', wish: '#b197fc' },
+  { name: 'Forest',  visited: '#51cf66', wish: '#ffd43b' },
+  { name: 'Berry',   visited: '#f06595', wish: '#845ef7' },
+  { name: 'Candy',   visited: '#ff8cc3', wish: '#74c0fc' },
+];
+
+function markActivePreset() {
+  document.querySelectorAll('.preset').forEach(el => {
+    const p = PRESETS[el.dataset.i];
+    el.classList.toggle('active',
+      p.visited.toLowerCase() === userColors.visited.toLowerCase() &&
+      p.wish.toLowerCase()    === userColors.wish.toLowerCase());
+  });
+}
+
+const presetRow = document.getElementById('presetRow');
+PRESETS.forEach((p, i) => {
+  const el = document.createElement('div');
+  el.className = 'preset';
+  el.dataset.i = i;
+  el.title = p.name;
+  el.innerHTML = `<span style="background:${p.visited}"></span><span style="background:${p.wish}"></span>`;
+  el.addEventListener('click', () => {
+    userColors.visited = p.visited;
+    userColors.wish = p.wish;
+    localStorage.setItem(COLOR_KEY, JSON.stringify(userColors));
+    applyColors();
+    updateStats();
+    markActivePreset();
+  });
+  presetRow.appendChild(el);
 });
 
 // initialize swatches + CSS variables from saved colors
 applyColors();
+markActivePreset();
 
 // ===== Share / save the current map as an image =====
 // Web build: composes the globe canvas + a caption, then uses the Web Share
