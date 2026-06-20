@@ -100,10 +100,17 @@
   .mode-btn.w.active { box-shadow: inset 0 0 0 1px var(--wish); }
   .mode-btn .hintkey { margin-left: auto; font-size: 10px; color: var(--muted); }
 
+  /* Collapsible color editor */
+  #colorToggle { width: 100%; margin-top: 10px; }
+  #colorPanel { margin-top: 10px; }
+  #colorPanel.hidden { display: none; }
+  .palette-group { margin-bottom: 10px; }
+  .plabel { font-size: 11px; color: var(--muted); display: block; margin-bottom: 5px; }
+
   /* Per-category color palette */
   .palette {
     display: flex; gap: 7px; flex-wrap: wrap;
-    margin: 2px 0 12px 4px;
+    margin: 2px 0 4px 2px;
   }
   .dot {
     width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
@@ -165,17 +172,26 @@
     </div>
 
     <div class="modes">
-      <div class="ml">Click mode &amp; color</div>
+      <div class="ml">Click mode</div>
 
       <button class="mode-btn v active" data-mode="visited">
         <input type="color" class="swatch" data-color="visited" title="Custom color" /> Visited
       </button>
-      <div class="palette" data-color="visited"></div>
-
       <button class="mode-btn w" data-mode="wish">
         <input type="color" class="swatch" data-color="wish" title="Custom color" /> Want to visit
       </button>
-      <div class="palette" data-color="wish"></div>
+
+      <button class="btn" id="colorToggle">🎨 Edit colors</button>
+      <div id="colorPanel" class="hidden">
+        <div class="palette-group">
+          <span class="plabel">Visited</span>
+          <div class="palette" data-color="visited"></div>
+        </div>
+        <div class="palette-group">
+          <span class="plabel">Want to visit</span>
+          <div class="palette" data-color="wish"></div>
+        </div>
+      </div>
     </div>
 
     <button class="btn" id="shareBtn" style="width:100%;margin-top:13px;">⤴ Share my map</button>
@@ -378,6 +394,15 @@ document.querySelectorAll('.palette').forEach(row => {
     dot.addEventListener('click', () => setCategoryColor(cat, color));
     row.appendChild(dot);
   });
+});
+
+// show/hide the color editor
+const colorToggle = document.getElementById('colorToggle');
+const colorPanel = document.getElementById('colorPanel');
+colorToggle.addEventListener('click', () => {
+  const open = colorPanel.classList.toggle('hidden') === false;
+  colorToggle.classList.toggle('active', open);
+  colorToggle.textContent = open ? '🎨 Hide colors' : '🎨 Edit colors';
 });
 
 // initialize swatches + CSS variables from saved colors
